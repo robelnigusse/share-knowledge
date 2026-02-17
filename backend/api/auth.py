@@ -3,10 +3,10 @@ from pydantic import BaseModel
 import requests
 import os
 from dotenv import load_dotenv 
-from db.models.users import users
-from db.config import session
+from database.models.users import users
+from database.config import session
 from sqlalchemy.orm import Session
-
+from security.auth_service import create_access_token
 load_dotenv()
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -23,7 +23,7 @@ GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
 @router.post("/login")
 def login(token_data: TokenData, db: Session = Depends(get_db)):
-    print(token_data.clientID)
+    
     response = requests.get(
         f"https://oauth2.googleapis.com/tokeninfo?id_token={token_data.clientID}"
     )
@@ -40,10 +40,12 @@ def login(token_data: TokenData, db: Session = Depends(get_db)):
         users.google_id == user_info["sub"]
     ).first()
 
+    access_token = create_access_token(data={"sub": user_info["email"]})
+
     if existing_user:
         return {
             "message": "Login successful",
-            "user_id": existing_user.id
+            "token": access_token
         }
     
     new_user = users(
@@ -54,12 +56,16 @@ def login(token_data: TokenData, db: Session = Depends(get_db)):
         role="user",
         is_banned=False
     )
+    try:
+        db.add(new_user)
+        db.commit()
+        return {
+            "message": "Signup successful",
+            "token": access_token
+        }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
-    db.add(new_user)
-    db.commit()
-
-    return {
-        "message": "Signup successful",
-        "user_id": new_user.id
-    }
+    
 

@@ -1,8 +1,9 @@
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
 from sqlalchemy import Column , Integer , String , Float , Boolean , DateTime
-Base = declarative_base()
-class users(Base):
+from sqlalchemy.orm import relationship
+from database.config import base
+
+class users(base):
     __tablename__ = "users"
 
     id = Column(Integer , primary_key=True , nullable=False, autoincrement=True)
@@ -14,6 +15,7 @@ class users(Base):
     is_banned = Column(Boolean , default=False)
     created_at = Column(DateTime , server_default=func.now())
     
+    books = relationship("books", back_populates="owner")
 
 
 
