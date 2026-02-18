@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from database.models.users import users
 from database.config import session
 from sqlalchemy.orm import Session
-from security.auth_service import create_access_token
+from service.auth_service import create_access_token
 load_dotenv()
 router = APIRouter(prefix="/auth", tags=["auth"])
 
