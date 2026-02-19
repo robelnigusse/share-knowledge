@@ -2,8 +2,13 @@
 import hashlib
 import os
 from dotenv import load_dotenv
-from fastapi import  HTTPException, UploadFile
+from fastapi import  Depends, HTTPException, UploadFile
 from supabase import create_client , Client
+from sqlalchemy.orm import Session
+from database.models.users import users
+from database.models.books import books
+
+from api.auth import get_db
 
 load_dotenv()
 
@@ -14,11 +19,17 @@ BUCKET_NAME = os.getenv("BUCKET_NAME")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+def get_hash(file: UploadFile):
+    file_bytes = file.file.read()
+    file_hash = hashlib.sha256(file_bytes).hexdigest()
+    return file_hash
+
+def check_file_exists(file_hash: str, db: Session ):
+    return db.query(books).filter(books.file_hash == file_hash).first()
+
+
 def upload_book_to_storage(file: UploadFile, filename: str):
     file_bytes = file.file.read()
-
-    # Create hash for uniqueness
-    file_hash = hashlib.sha256(file_bytes).hexdigest()
 
     storage_path = f"{filename}"
     try:
@@ -33,5 +44,23 @@ def upload_book_to_storage(file: UploadFile, filename: str):
 
     # Get private URL
     public_url = supabase.storage.from_(BUCKET_NAME).create_signed_url(storage_path, 3600)  # URL valid for 1 hour
+    return public_url["signedURL"]
 
-    return public_url, file_hash
+
+def upload_book_to_db(db: Session,file_url,file_hash,current_user_data: dict,description="this goes to the description",title="Unknown",category="General" ):
+    user_id= db.query(users).filter(users.email == current_user_data.get("email")).first().id
+    try:
+
+        new_book = books(title=title,description=description,file_url=file_url,file_hash=file_hash,owner_id=user_id,category=category)
+        db.add(new_book)
+        db.commit()
+        db.refresh(new_book)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+    
+
+
+    
+
+

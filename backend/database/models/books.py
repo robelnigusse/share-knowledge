@@ -11,13 +11,12 @@ class books(base):
     id = Column(Integer , primary_key=True , nullable=False, autoincrement=True)
     title = Column(String(255) , nullable=False)
     description = Column(String(255))
-    file_url = Column(String(255) , nullable=False)
+    file_url = Column(String , nullable=False)
     file_hash = Column(String(64) , nullable=False, unique=True)
     owner_id = Column(Integer , ForeignKey("users.id") , nullable=False)
     status = Column(String(20) , default="active")
     category = Column(String(50) , default="General")
     upload_date = Column(DateTime , server_default=func.now())
-    
     owner = relationship("users", back_populates="books")
 
 
