@@ -1,6 +1,7 @@
 
 import hashlib
 import os
+from urllib.parse import urlparse
 from dotenv import load_dotenv
 from fastapi import  Depends, HTTPException, UploadFile
 from supabase import create_client , Client
@@ -34,7 +35,7 @@ def upload_book_to_storage(file: UploadFile, filename: str):
     storage_path = f"{filename}"
     try:
     # Upload to Supabase bucket
-        response = supabase.storage.from_(BUCKET_NAME).upload(
+         supabase.storage.from_(BUCKET_NAME).upload(
                     path=storage_path,
                     file=file_bytes,
                     file_options={"content-type": "application/pdf"}
@@ -43,7 +44,7 @@ def upload_book_to_storage(file: UploadFile, filename: str):
         raise HTTPException(status_code=500, detail=str(e))
 
     # Get private URL
-    public_url = supabase.storage.from_(BUCKET_NAME).create_signed_url(storage_path, 3600)  # URL valid for 1 hour
+    public_url = supabase.storage.from_(BUCKET_NAME).create_signed_url(storage_path, 36000000)  # URL valid for 1 hour
     return public_url["signedURL"]
 
 
@@ -55,6 +56,14 @@ def upload_book_to_db(db: Session,file_url,file_hash,current_user_data: dict,des
         db.add(new_book)
         db.commit()
         db.refresh(new_book)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+def delete_book_from_storage(url: str):
+    try:
+        file_path = a = urlparse(url).path
+        supabase.storage.from_(BUCKET_NAME).remove(os.path.basename(file_path))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
