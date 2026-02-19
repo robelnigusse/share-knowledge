@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy.orm import Session
+from schemas.book import BookResponse
 from service.auth_service import get_current_user
 from service.books_service import  check_file_exists, delete_book_from_storage, get_hash, upload_book_to_db, upload_book_to_storage
 import database.models.books
@@ -14,9 +15,15 @@ from database.models.books import books
 router = APIRouter(prefix="/books", tags=["books"]) 
 
 
-@router.get("/")
+@router.get("/all-books",response_model=list[BookResponse])
 def get_books(db: Session = Depends(get_db)):
-    return db.query(database.models.books.books).all()
+    result = db.query(books).all()
+    return result
+
+@router.get("/users-books" , response_model=list[BookResponse])
+def users_books(current_user_data: dict = Depends(get_current_user),db: Session = Depends(get_db)):
+    result = db.query(books).filter(books.owner_id == db.query(users).filter(users.email == current_user_data.get("email")).first().id).order_by(books.upload_date.desc()).all()
+    return result
 
 
 # title: str=Form(...),
