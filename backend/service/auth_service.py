@@ -31,7 +31,8 @@ def get_current_user(token: str = Header(None)):
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-
+    if token is None:
+        raise credentials_exception
     print(token)
 
     try:

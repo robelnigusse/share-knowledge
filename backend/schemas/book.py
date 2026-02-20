@@ -16,7 +16,6 @@ class BookResponse(BaseModel):
     id: int
     title: str
     description: Optional[str]
-    file_url: str
     category: str
     upload_date: datetime
     
