@@ -43,9 +43,15 @@ def login(token_data: TokenData, db: Session = Depends(get_db)):
     access_token = create_access_token(data={"sub": user_info["email"]})
 
     if existing_user:
+        
         return {
             "message": "Login successful",
-            "token": access_token
+            "token": access_token,
+            "user": {
+                "name": existing_user.name,
+                "email": existing_user.email,
+                "user_id": existing_user.id
+            }
         }
     
     new_user = users(
@@ -61,7 +67,12 @@ def login(token_data: TokenData, db: Session = Depends(get_db)):
         db.commit()
         return {
             "message": "Signup successful",
-            "token": access_token
+            "token": access_token,
+            "user": {
+                "name": user_info["name"],
+                "email": user_info["email"],  
+                "user_id": db.query(users).filter(users.google_id == user_info["sub"]).first().id   
+            }
         }
     except Exception as e:
         db.rollback()

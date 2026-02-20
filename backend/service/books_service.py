@@ -1,7 +1,7 @@
 
 import hashlib
 import os
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 from dotenv import load_dotenv
 from fastapi import  Depends, HTTPException, UploadFile
 from supabase import create_client , Client
@@ -48,8 +48,11 @@ def upload_book_to_storage(file: UploadFile, filename: str):
     return public_url["signedURL"]
 
 
-def upload_book_to_db(db: Session,file_url,file_hash,current_user_data: dict,description="this goes to the description",title="Unknown",category="General" ):
+def upload_book_to_db(db: Session,file_url : str,file_hash,current_user_data: dict,description="this goes to the description",category="General" ):
+
     user_id= db.query(users).filter(users.email == current_user_data.get("email")).first().id
+    title =os.path.basename(urlparse(file_url).path)
+
     try:
 
         new_book = books(title=title,description=description,file_url=file_url,file_hash=file_hash,owner_id=user_id,category=category)
@@ -62,11 +65,15 @@ def upload_book_to_db(db: Session,file_url,file_hash,current_user_data: dict,des
 
 def delete_book_from_storage(url: str):
     try:
-        file_path = a = urlparse(url).path
-        supabase.storage.from_(BUCKET_NAME).remove(os.path.basename(file_path))
+        parsed = urlparse(url)
+
+        # Decode %20 etc.
+        decoded_path = unquote(parsed.path)
+        file_name = decoded_path.split("/")[-1]
+        supabase.storage.from_(BUCKET_NAME).remove([file_name])
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
     
 
 

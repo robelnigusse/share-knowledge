@@ -26,12 +26,10 @@ def users_books(current_user_data: dict = Depends(get_current_user),db: Session 
     return result
 
 
-# title: str=Form(...),
-            #   ,description: str=Form(None)
-            #   category: str=Form("General"),#   status: str=Form("active"),
 @router.post("/add-book")
 def add_books(
-            
+            #   description: str=Form(None),
+            #   category: str=Form("General"),
               file: UploadFile=File(...),
               current_user_data: dict = Depends(get_current_user),
               db: Session = Depends(get_db)
@@ -63,7 +61,7 @@ def delete_book(book_id: int, db: Session = Depends(get_db),current_user_data: d
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
     
-    user_id = user_id= db.query(users).filter(users.email == current_user_data.get("email")).first().id
+    user_id = db.query(users).filter(users.email == current_user_data.get("email")).first().id
     book_owner= db.query(books).filter(books.id == book_id).first().owner_id
 
     if user_id != book_owner:
