@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from api import auth
 from api import books
 from database.config import engine , base
-from api import users as USERS
+from api import users 
 
 
 app = FastAPI()
@@ -20,5 +20,5 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(books.router)
-# app.include_router(USERS.router)
+app.include_router(users.router)
 

@@ -1,19 +1,19 @@
-from fastapi import APIRouter, HTTPException,Depends
+from fastapi import APIRouter, HTTPException,Depends, Response
 from pydantic import BaseModel
 import requests
 import os
 from dotenv import load_dotenv 
 from database.models.users import users
-from database.config import session
+from database.config import sessionLocal
 from sqlalchemy.orm import Session
 from service.auth_service import create_access_token
 load_dotenv()
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(tags=["auth"])
 
 class TokenData(BaseModel):
     clientID: str
 def get_db():
-    db = session()
+    db = sessionLocal()
     try:
         yield db
     finally:
@@ -22,15 +22,15 @@ def get_db():
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
 @router.post("/login")
-def login(token_data: TokenData, db: Session = Depends(get_db)):
-    
-    response = requests.get(
+def login(response: Response,token_data: TokenData, db: Session = Depends(get_db)):
+    print(token_data)
+    google_response = requests.get(
         f"https://oauth2.googleapis.com/tokeninfo?id_token={token_data.clientID}"
     )
-    if response.status_code != 200:
+    if google_response.status_code != 200:
         raise HTTPException(status_code=400, detail="Invalid token")
     
-    user_info = response.json()
+    user_info = google_response.json()
 
     if user_info["aud"] != GOOGLE_CLIENT_ID:
         raise HTTPException(status_code=400, detail="Invalid client ID")
@@ -43,15 +43,21 @@ def login(token_data: TokenData, db: Session = Depends(get_db)):
     access_token = create_access_token(data={"sub": user_info["email"]})
 
     if existing_user:
-        
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            samesite="lax",
+            # secure=False # will be set true at end of project
+        )
         return {
             "message": "Login successful",
-            "token": access_token,
-            "user": {
-                "name": existing_user.name,
-                "email": existing_user.email,
-                "user_id": existing_user.id
-            }
+            # "token": access_token,
+            # "user": {
+            #     "name": existing_user.name,
+            #     "email": existing_user.email,
+            #     "user_id": existing_user.id
+            # }
         }
     
     new_user = users(
@@ -65,14 +71,21 @@ def login(token_data: TokenData, db: Session = Depends(get_db)):
     try:
         db.add(new_user)
         db.commit()
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            samesite="lax",
+            # secure=False # will be set true at end of project
+        )
         return {
             "message": "Signup successful",
-            "token": access_token,
-            "user": {
-                "name": user_info["name"],
-                "email": user_info["email"],  
-                "user_id": db.query(users).filter(users.google_id == user_info["sub"]).first().id   
-            }
+            # "token": access_token,
+            # "user": {
+            #     "name": user_info["name"],
+            #     "email": user_info["email"],  
+            #     "user_id": db.query(users).filter(users.google_id == user_info["sub"]).first().id   
+            # }
         }
     except Exception as e:
         db.rollback()

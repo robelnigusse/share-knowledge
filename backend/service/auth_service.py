@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 from jose import JWTError, jwt
-from fastapi import HTTPException, Header, status
+from fastapi import HTTPException, Header, Request, status
 import os
 
 
@@ -25,14 +25,15 @@ def create_access_token(data: dict):
 
 
 
-def get_current_user(token: str = Header(None)):
+def get_current_user(request: Request):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-
-    print(token)
+    token = request.cookies.get("access_token")
+    if token is None:
+        raise HTTPException(status_code=401, detail="Token not found")
 
     try:
         
