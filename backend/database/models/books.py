@@ -1,6 +1,6 @@
 from enum import unique
 from sqlalchemy.sql import func
-from sqlalchemy import Column, ForeignKey , Integer , String , Float , Boolean , DateTime
+from sqlalchemy import TEXT, Column, ForeignKey , Integer , String , Float , Boolean , DateTime
 from sqlalchemy.orm import relationship
 from database.config import base
 
@@ -9,8 +9,8 @@ class books(base):
     __tablename__ = "books"
 
     id = Column(Integer , primary_key=True , nullable=False, autoincrement=True)
-    title = Column(String(255) , nullable=False)
-    description = Column(String(255))
+    title = Column(TEXT, nullable=False)
+    description = Column(TEXT)
     file_url = Column(String , nullable=False)
     file_hash = Column(String(64) , nullable=False, unique=True)
     owner_id = Column(Integer , ForeignKey("users.id") , nullable=False)

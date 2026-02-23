@@ -4,16 +4,16 @@ import requests
 import os
 from dotenv import load_dotenv 
 from database.models.users import users
-from database.config import session
+from database.config import sessionLocal
 from sqlalchemy.orm import Session
 from service.auth_service import create_access_token
 load_dotenv()
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(tags=["auth"])
 
 class TokenData(BaseModel):
     clientID: str
 def get_db():
-    db = session()
+    db = sessionLocal()
     try:
         yield db
     finally:
@@ -23,7 +23,7 @@ GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
 @router.post("/login")
 def login(response: Response,token_data: TokenData, db: Session = Depends(get_db)):
-
+    print(token_data)
     google_response = requests.get(
         f"https://oauth2.googleapis.com/tokeninfo?id_token={token_data.clientID}"
     )

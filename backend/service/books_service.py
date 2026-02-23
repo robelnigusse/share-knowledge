@@ -8,6 +8,9 @@ from supabase import create_client , Client
 from sqlalchemy.orm import Session
 from database.models.users import users
 from database.models.books import books
+from pypdf import PdfReader
+import requests
+import json
 
 from api.auth import get_db
 
@@ -16,6 +19,8 @@ load_dotenv()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 BUCKET_NAME = os.getenv("BUCKET_NAME")
+AI_URL = os.getenv("AI_URL")
+
 
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -48,11 +53,10 @@ def upload_book_to_storage(file: UploadFile, filename: str):
     return public_url["signedURL"]
 
 
-def upload_book_to_db(db: Session,file_url : str,file_hash,current_user_data: dict,description="this goes to the description",category="General" ):
+def upload_book_to_db(category: str,db: Session,file_url : str,file_hash,current_user_data: dict,description): 
 
     user_id= db.query(users).filter(users.email == current_user_data.get("email")).first().id
     title =os.path.basename(urlparse(file_url).path)
-
     try:
 
         new_book = books(title=title,description=description,file_url=file_url,file_hash=file_hash,owner_id=user_id,category=category)
@@ -75,6 +79,46 @@ def delete_book_from_storage(url: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
+
+def get_book_description(file: UploadFile):
+    reader = PdfReader(file.file)
+    text = ""
+    for page in reader.pages:
+        text += page.extract_text() or ""
+    if not text.split():
+        raise HTTPException(status_code=400, detail="File is empty")
+    
+    url = AI_URL
+    
+    payload = {
+        'text': text,
+        'length': 'short',
+        'style': 'professional',
+        'format': 'paragraph',
+        'outputLang': 'auto',
+        'includeKeywords': False
+    }
+    
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    
+    response = requests.post(url, json=payload, headers=headers)
+    
+    if response.status_code == 200:
+        data = response.json()
+        if data.get('success'):
+            print(data['summary'])
+            return data['summary']
+        else:
+            raise HTTPException(status_code=400, detail=data['error'])
+            
+    else:
+        raise HTTPException(status_code=400, detail="Failed to get book description")
+        
+    
+
+
 
 
     

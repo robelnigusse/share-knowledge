@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 from schemas.book import BookResponse
 from service.auth_service import get_current_user
-from service.books_service import  check_file_exists, delete_book_from_storage, get_hash, upload_book_to_db, upload_book_to_storage
+from service.books_service import  check_file_exists, delete_book_from_storage, get_book_description, get_hash, upload_book_to_db, upload_book_to_storage
 from api.auth import get_db
 from database.models.users import users
 from database.models.books import books
@@ -25,27 +25,29 @@ def downlaod_book(book_id: int, db: Session = Depends(get_db), current_user_data
     return {"file_url": book.file_url}
 
 
-@router.get("/all-books",response_model=list[BookResponse])
+@router.get("",response_model=list[BookResponse])
 def get_books(db: Session = Depends(get_db)):
     result = db.query(books).all()
     return result
 
-@router.get("/book/{book_id}",response_model=BookResponse)
-def get_book(book_id: int, db: Session = Depends(get_db)):
-    result = db.query(books).filter(books.id == book_id).first()
-    return result
-
-
-@router.get("/user-books" , response_model=list[BookResponse])
+@router.get("/me" , response_model=list[BookResponse])
 def users_books(current_user_data: dict = Depends(get_current_user),db: Session = Depends(get_db)):
     result = db.query(books).filter(books.owner_id == db.query(users).filter(users.email == current_user_data.get("email")).first().id).order_by(books.upload_date.desc()).all()
     return result
 
 
-@router.post("/add-book")
+@router.get("/{book_id}",response_model=BookResponse)
+def get_book(book_id: int, db: Session = Depends(get_db)):
+    result = db.query(books).filter(books.id == book_id).first()
+    if not result:
+     raise HTTPException(status_code=404, detail="Book not found")
+    return result
+
+
+@router.post("")
 def add_books(
             #   description: str=Form(None),
-            #   category: str=Form("General"),
+              category: str=Form("General"),
               file: UploadFile=File(...),
               current_user_data: dict = Depends(get_current_user),
               db: Session = Depends(get_db)
@@ -57,9 +59,10 @@ def add_books(
 
         if check_file_exists(hash,db=db):
             raise HTTPException(status_code=409, detail="File already exists")
-
+        # get file description from open ai if possible
+        description = get_book_description(file)
         url  = upload_book_to_storage(file, file.filename)
-        upload_book_to_db(file_url=url,file_hash=hash,current_user_data=current_user_data,db=db)
+        upload_book_to_db(category=category,file_url=url,file_hash=hash,current_user_data=current_user_data,db=db,description=description)
         return {
             "message": "File uploaded successfully",
             "file_url": url,
@@ -71,7 +74,7 @@ def add_books(
 
     
     
-@router.delete("/delete-book/{book_id}")
+@router.delete("/{book_id}")
 def delete_book(book_id: int, db: Session = Depends(get_db),current_user_data: dict = Depends(get_current_user)):
     book = db.query(books).filter(books.id == book_id).first()
     if not book:
