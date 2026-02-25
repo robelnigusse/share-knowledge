@@ -5,7 +5,7 @@ import axios from "axios";
 
 const App = () => {
   const handleSuccess = (credentialResponse) => {
-    axios.post("http://localhost:8000/auth/login", {
+    axios.post("http://localhost:8000/login", {
       clientID : credentialResponse.credential
     }).then((response) => {
       console.log(response.data);

@@ -13,11 +13,12 @@ class books(base):
     description = Column(TEXT)
     file_url = Column(String , nullable=False)
     file_hash = Column(String(64) , nullable=False, unique=True)
-    owner_id = Column(Integer , ForeignKey("users.id") , nullable=False)
+    owner_id = Column(Integer , ForeignKey("users.id" , ondelete="CASCADE") , nullable=False)
     status = Column(String(20) , default="active")
     category = Column(String(50) , default="General")
     upload_date = Column(DateTime , server_default=func.now())
-    owner = relationship("users", back_populates="books")
+
+    owner = relationship("users", back_populates="books" )
 
 
 # CREATE TABLE books (

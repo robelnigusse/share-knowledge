@@ -15,7 +15,7 @@ class users(base):
     is_banned = Column(Boolean , default=False)
     created_at = Column(DateTime , server_default=func.now())
     
-    books = relationship("books", back_populates="owner")
+    books = relationship("books", back_populates="owner", cascade="all, delete-orphan")
 
 
 
