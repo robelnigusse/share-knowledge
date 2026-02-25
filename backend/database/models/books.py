@@ -19,6 +19,7 @@ class books(base):
     upload_date = Column(DateTime , server_default=func.now())
 
     owner = relationship("users", back_populates="books" )
+    reports = relationship("reports", back_populates="book")
 
 
 # CREATE TABLE books (

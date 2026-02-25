@@ -16,6 +16,7 @@ class users(base):
     created_at = Column(DateTime , server_default=func.now())
     
     books = relationship("books", back_populates="owner", cascade="all, delete-orphan")
+    reports = relationship("reports", back_populates="reporter", cascade="all, delete-orphan")
 
 
 
