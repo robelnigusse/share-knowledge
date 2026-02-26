@@ -22,11 +22,11 @@ def report_book( report_data : ReportCreate ,db: Session = Depends(get_db) , cur
     if book.owner_id == db.query(users.users).filter(users.users.email == current_user_data.get("email")).first().id:
         raise HTTPException(status_code=403, detail="You cannot report your own book")
     
-    
-    # if db.query(reports.reports).filter(reports.reports.book_id == report_data.book_id).first():
-    #     raise HTTPException(status_code=400, detail="You have already reported this book")
-    
     id = db.query(users.users).filter(users.users.email == current_user_data.get("email")).first().id
+    
+    if db.query(reports.reports).filter(reports.reports.book_id == report_data.book_id , reports.reports.reporter_id == id).first():
+        raise HTTPException(status_code=400, detail="You have already reported this book")
+    
 
     new_report = reports.reports(
         reporter_id=id,
