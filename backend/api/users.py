@@ -25,7 +25,7 @@ def get_user(db: Session = Depends(get_db),current_user_data: dict = Depends(get
 #     return {"message": "User deleted successfully"}
 
 
-@router.put("/users")
+@router.put("/me")
 def update_user(
     newuser: UserUpdate,
     db: Session = Depends(get_db),
