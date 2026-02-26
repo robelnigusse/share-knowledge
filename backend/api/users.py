@@ -14,6 +14,16 @@ def get_user(db: Session = Depends(get_db),current_user_data: dict = Depends(get
         raise HTTPException(status_code=404, detail="User not found")
     return me
 
+# @router.delete("/me")
+# def delete_user(db: Session = Depends(get_db),current_user_data: dict = Depends(get_current_user)):
+#     user_email = current_user_data.get("email")
+#     user = db.query(users).filter(users.email == user_email).first()
+#     if not user:
+#         raise HTTPException(status_code=404, detail="User not found")
+#     db.delete(user)
+#     db.commit()
+#     return {"message": "User deleted successfully"}
+
 
 @router.put("/users")
 def update_user(
