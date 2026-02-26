@@ -46,7 +46,6 @@ def get_book(book_id: int, db: Session = Depends(get_db)):
 
 @router.post("")
 def add_books(
-            #   description: str=Form(None),
               category: str=Form("General"),
               file: UploadFile=File(...),
               current_user_data: dict = Depends(get_current_user),
@@ -54,6 +53,8 @@ def add_books(
               ):
     if file.content_type != "application/pdf":
         raise HTTPException(status_code=400, detail="File must be a PDF")
+    if not current_user_data:
+        raise HTTPException(status_code=401, detail="Unauthorized")
     try:
         hash = get_hash(file)
 
