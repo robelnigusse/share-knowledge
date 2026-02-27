@@ -1,24 +1,9 @@
-// axiosInstance.js
-import axios from 'axios';
-import Cookies from 'js-cookie';
+// api/axiosClient.js
+import axios from "axios";
 
-const authClient = axios.create({
-  baseURL: 'http://localhost:8000/', 
-  headers: {
-    'Content-Type': 'application/json',
-  },
+const api = axios.create({
+  baseURL: "http://localhost:8000",
+  withCredentials: true,
 });
 
-
-authClient.interceptors.request.use(
-  (config) => {
-    const token = Cookies.get('token'); 
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-export default authClient;
+export default api;
