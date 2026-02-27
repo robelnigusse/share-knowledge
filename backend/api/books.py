@@ -12,6 +12,8 @@ from database.models.books import books
 
 
 router = APIRouter(prefix="/books", tags=["books"]) 
+MAX_SIZE_MB = 10
+MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024  # 12 MB in bytes
 
 
 @router.get("/download/{book_id}")
@@ -21,6 +23,12 @@ def downlaod_book(book_id: int, db: Session = Depends(get_db), current_user_data
     book = db.query(books).filter(books.id == book_id).first()
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
+    
+    if db.query(users).filter(users.email == current_user_data.get("email")).first().credits < 10:
+        raise HTTPException(status_code=403, detail="You don't have enough credits to download this book")
+    
+    db.query(users).filter(users.email == current_user_data.get("email")).first().credits -= 10
+    db.commit()
     
     return {"file_url": book.file_url}
 
@@ -45,7 +53,7 @@ def get_book(book_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("")
-def add_books(
+async def add_books(
               category: str=Form("General"),
               file: UploadFile=File(...),
               current_user_data: dict = Depends(get_current_user),
@@ -55,6 +63,20 @@ def add_books(
         raise HTTPException(status_code=400, detail="File must be a PDF")
     if not current_user_data:
         raise HTTPException(status_code=401, detail="Unauthorized")
+
+
+    # check file size
+    await file.seek(0)  # Ensure we start at the beginning
+    size_bytes = 0
+    chunk_size = 1024 * 1024  # 1 MB per chunk
+
+    chunk = await file.read(chunk_size)
+    while chunk:
+        size_bytes += len(chunk)
+        if size_bytes > MAX_SIZE_BYTES:
+            raise HTTPException(status_code=400, detail=f"File too large. Max {MAX_SIZE_MB} MB allowed.")
+        chunk = await file.read(chunk_size)
+    
     try:
         hash = get_hash(file)
 
@@ -64,6 +86,8 @@ def add_books(
         description = get_book_description(file)
         url  = upload_book_to_storage(file, file.filename)
         upload_book_to_db(category=category,file_url=url,file_hash=hash,current_user_data=current_user_data,db=db,description=description)
+        db.query(users).filter(users.email == current_user_data.get("email")).first().credits += 10
+        db.commit()
         return {
             "message": "File uploaded successfully",
             "file_url": url,
