@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from database.models.users import users
 from database.config import sessionLocal
 from sqlalchemy.orm import Session
-from service.auth_service import create_access_token
+from service.auth_service import create_access_token, get_current_user
 load_dotenv()
 router = APIRouter(tags=["auth"])
 
@@ -52,12 +52,6 @@ def login(response: Response,token_data: TokenData, db: Session = Depends(get_db
         )
         return {
             "message": "Login successful",
-            # "token": access_token,
-            # "user": {
-            #     "name": existing_user.name,
-            #     "email": existing_user.email,
-            #     "user_id": existing_user.id
-            # }
         }
     
     new_user = users(
@@ -80,12 +74,6 @@ def login(response: Response,token_data: TokenData, db: Session = Depends(get_db
         )
         return {
             "message": "Signup successful",
-            # "token": access_token,
-            # "user": {
-            #     "name": user_info["name"],
-            #     "email": user_info["email"],  
-            #     "user_id": db.query(users).filter(users.google_id == user_info["sub"]).first().id   
-            # }
         }
     except Exception as e:
         db.rollback()
@@ -93,3 +81,11 @@ def login(response: Response,token_data: TokenData, db: Session = Depends(get_db
 
     
 
+
+@router.post("/logout")
+def logout(response: Response,current_user_data: dict = Depends(get_current_user)):
+    if not current_user_data:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    response.delete_cookie(key="access_token", httponly=True, samesite="lax")
+    return {"message": "Logout successful"}
