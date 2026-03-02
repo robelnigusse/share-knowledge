@@ -47,8 +47,8 @@ def login(response: Response,token_data: TokenData, db: Session = Depends(get_db
             key="access_token",
             value=access_token,
             httponly=True,
-            samesite="lax",
-            # secure=False # will be set true at end of project
+            samesite="none",
+            secure=True 
         )
         return {
             "message": "Login successful",
@@ -69,8 +69,8 @@ def login(response: Response,token_data: TokenData, db: Session = Depends(get_db
             key="access_token",
             value=access_token,
             httponly=True,
-            samesite="lax",
-            # secure=False # will be set true at end of project
+            samesite="none",
+            secure=True 
         )
         return {
             "message": "Signup successful",
