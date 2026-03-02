@@ -76,7 +76,7 @@ async def add_books(
         if size_bytes > MAX_SIZE_BYTES:
             raise HTTPException(status_code=400, detail=f"File too large. Max {MAX_SIZE_MB} MB allowed.")
         chunk = await file.read(chunk_size)
-    
+    await file.seek(0)  # Reset file pointer after size check
     try:
         hash = get_hash(file)
 
