@@ -1,25 +1,26 @@
-import { useState, useEffect } from "react";
-import Navbar from "../../components/Navbar";
+import { useState, useEffect, useContext } from "react";
 import BookCard from "../../components/BookCard";
-
+import api from "../../services/apiClient";
+import { AuthContext } from "../../context/AuthContext";
 
 function Home() {
-  const books = [
-    {
-      id: 1,
-      image: "monte.jpg",
-      title: "The Republic of Thieves",
-      author: "Scott Lynch",
-      description: "A handbook of agile software craftsmanship."
-    },
-    {
-      id: 2,
-      image: "valour.jpg",
-      title: "Valour",
-      author: "John Gwynne",
-      description: "Journey to mastery and better software development."
-    },
-  ];
+  const [books, setBooks] = useState([]);
+  const { user } = useContext(AuthContext);
+  console.log("Current user:", user);
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const response = await api.get("/books/");
+        setBooks(response.data);
+        console.log("Fetched books:", response.data);
+      } catch (error) {
+        console.error("Error fetching books:", error);
+      }
+    };
+
+    fetchBooks();
+  }, []);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -44,16 +45,15 @@ function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors">
-
       <main className="max-w-6xl mx-auto px-6 py-10 flex flex-col gap-10">
-
         <section className="flex flex-col gap-4 text-center md:text-left">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100">
             Discover & Share Great Books
           </h1>
 
           <p className="text-gray-600 dark:text-gray-400 max-w-2xl">
-            Upload your books, earn credits, and explore what others are sharing.
+            Upload your books, earn credits, and explore what others are
+            sharing.
           </p>
         </section>
 
@@ -66,9 +66,7 @@ function Home() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-3 rounded-xl border bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             />
-            <span className="absolute left-3 top-3 text-gray-400">
-              🔍
-            </span>
+            <span className="absolute left-3 top-3 text-gray-400">🔍</span>
           </div>
 
           {isSearching && (
@@ -79,11 +77,8 @@ function Home() {
         </section>
 
         <section className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-
           {filteredBooks.length > 0 ? (
-            filteredBooks.map((book) => (
-              <BookCard key={book.id} book={book} />
-            ))
+            filteredBooks.map((book) => <BookCard key={book.id} book={book} />)
           ) : (
             <div className="col-span-full text-center py-16">
               <p className="text-lg text-gray-500 dark:text-gray-400">
@@ -91,9 +86,7 @@ function Home() {
               </p>
             </div>
           )}
-
         </section>
-
       </main>
     </div>
   );
