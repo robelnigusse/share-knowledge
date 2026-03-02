@@ -26,26 +26,40 @@ export default function LoginPage() {
    if(user) {
     navigate("/");
   }
-   const handleSuccess = async (credentialResponse) => {
+  //  const handleSuccess = async (credentialResponse) => {
 
-    axios.post("/login", {
+  //   axios.post("/login", {
 
-      clientID : credentialResponse.credential
+  //     clientID : credentialResponse.credential
 
-    }).then((response) => {
+  //   }).then((response) => {
 
-      console.log(response.data);
+  //     console.log(response.data);
 
-      // navigate("/");
+  //     // navigate("/");
 
-    }).catch((error) => {
+  //   }).catch((error) => {
 
-      console.log(error);
+  //     console.log(error);
 
-    })
+  //   })
+  //   await fetchUser();
+
+  // };
+  const handleSuccess = async (credentialResponse) => {
+  try {
+    await axios.post("/login", {
+      clientID: credentialResponse.credential
+    });
+
     await fetchUser();
 
-  };
+    navigate("/");
+
+  } catch (error) {
+    console.error("Login Error:", error);
+  }
+};
 
 
 
