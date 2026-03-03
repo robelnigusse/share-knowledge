@@ -1,4 +1,8 @@
+
+from typing import Optional
+
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from schemas.book import BookResponse
 from service.auth_service import get_current_user
@@ -14,42 +18,6 @@ from database.models.books import books
 router = APIRouter(prefix="/books", tags=["books"]) 
 MAX_SIZE_MB = 10
 MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024  # 12 MB in bytes
-
-
-@router.get("/download/{book_id}")
-def downlaod_book(book_id: int, db: Session = Depends(get_db), current_user_data: dict = Depends(get_current_user)):
-    if not current_user_data:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    book = db.query(books).filter(books.id == book_id).first()
-    if not book:
-        raise HTTPException(status_code=404, detail="Book not found")
-    
-    if db.query(users).filter(users.email == current_user_data.get("email")).first().credits < 10:
-        raise HTTPException(status_code=403, detail="You don't have enough credits to download this book")
-    
-    db.query(users).filter(users.email == current_user_data.get("email")).first().credits -= 10
-    db.commit()
-    
-    return {"file_url": book.file_url}
-
-
-@router.get("",response_model=list[BookResponse])
-def get_books(db: Session = Depends(get_db)):
-    result = db.query(books).all()
-    return result
-
-@router.get("/me" , response_model=list[BookResponse])
-def users_books(current_user_data: dict = Depends(get_current_user),db: Session = Depends(get_db)):
-    result = db.query(books).filter(books.owner_id == db.query(users).filter(users.email == current_user_data.get("email")).first().id).order_by(books.upload_date.desc()).all()
-    return result
-
-
-@router.get("/{book_id}",response_model=BookResponse)
-def get_book(book_id: int, db: Session = Depends(get_db)):
-    result = db.query(books).filter(books.id == book_id).first()
-    if not result:
-     raise HTTPException(status_code=404, detail="Book not found")
-    return result
 
 
 @router.post("")
@@ -76,7 +44,8 @@ async def add_books(
         if size_bytes > MAX_SIZE_BYTES:
             raise HTTPException(status_code=400, detail=f"File too large. Max {MAX_SIZE_MB} MB allowed.")
         chunk = await file.read(chunk_size)
-    await file.seek(0)  # Reset file pointer after size check
+    await file.seek(0)
+    
     try:
         hash = get_hash(file)
 
@@ -96,6 +65,44 @@ async def add_books(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
        
+@router.get("/download/{book_id}")
+def downlaod_book(book_id: int, db: Session = Depends(get_db), current_user_data: dict = Depends(get_current_user)):
+    if not current_user_data:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    book = db.query(books).filter(books.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+    
+    if db.query(users).filter(users.email == current_user_data.get("email")).first().credits < 10:
+        raise HTTPException(status_code=403, detail="You don't have enough credits to download this book")
+    
+    db.query(users).filter(users.email == current_user_data.get("email")).first().credits -= 10
+    db.commit()
+    
+    return {"file_url": book.file_url}
+
+@router.get("/me" , response_model=list[BookResponse])
+def users_books(current_user_data: dict = Depends(get_current_user),db: Session = Depends(get_db)):
+    result = db.query(books).filter(books.owner_id == db.query(users).filter(users.email == current_user_data.get("email")).first().id).order_by(books.upload_date.desc()).all()
+    return result
+
+
+@router.get("",response_model=list[BookResponse])
+def get_books(search:Optional[str] = None , db:Session=Depends(get_db)):
+    if search:
+        search_filter = f"%{search}%"
+        return db.query(books).filter(
+            or_(books.title.ilike(search_filter),
+                books.category.ilike(search_filter) )).all()
+    return db.query(books).all()
+
+
+@router.get("/{book_id}",response_model=BookResponse)
+def get_book(book_id: int, db: Session = Depends(get_db)):
+    result = db.query(books).filter(books.id == book_id).first()
+    if not result:
+     raise HTTPException(status_code=404, detail="Book not found")
+    return result
 
     
     
