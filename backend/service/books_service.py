@@ -26,6 +26,7 @@ AI_URL = os.getenv("AI_URL")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def get_hash(file: UploadFile):
+    file.file.seek(0)
     file_bytes = file.file.read()
     file_hash = hashlib.sha256(file_bytes).hexdigest()
     return file_hash
@@ -35,6 +36,7 @@ def check_file_exists(file_hash: str, db: Session ):
 
 
 def upload_book_to_storage(file: UploadFile, filename: str):
+    file.file.seek(0)
     file_bytes = file.file.read()
 
     storage_path = f"{filename}"
@@ -81,6 +83,7 @@ def delete_book_from_storage(url: str):
     
 
 def get_book_description(file: UploadFile):
+    file.file.seek(0)
     reader = PdfReader(file.file)
     text = ""
     for page in reader.pages:
