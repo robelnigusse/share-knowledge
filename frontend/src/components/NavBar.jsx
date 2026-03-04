@@ -1,3 +1,5 @@
+//TODO: add a dropdown menu for user profile with options like "My Profile", "My Books", and "Logout" instead of just a logout button and also credit disappears below 640px i need to fix that
+
 import { useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";

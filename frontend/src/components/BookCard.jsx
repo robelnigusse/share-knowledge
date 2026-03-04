@@ -1,4 +1,4 @@
-
+// TODO: correct responsive design and change the download button to a link that opens in a new tab for view details of the book instead of downloading it directly
 
 function BookCard({ book }) {
   return (
