@@ -14,6 +14,7 @@ class BookUpdate(BaseModel):
 
 class BookResponse(BaseModel):
     id: int
+    owner_id: int
     title: str
     description: Optional[str]
     category: str
