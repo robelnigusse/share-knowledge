@@ -24,10 +24,10 @@ function MyBook({ book }) {
         </p>
 
         <Link
-          to={`/my-book/${book.id}`}
+          to={`/my-books/${book.id}`}
           className="mt-4 w-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 py-3 rounded-xl font-semibold hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 transition-all flex items-center justify-center gap-2"
         >
-          Delete
+          View Detail
           <span className="text-lg">→</span>
         </Link>
       </div>

@@ -3,14 +3,15 @@ import { useParams } from "react-router-dom";
 import api from "../../services/apiClient";
 import { BookList } from "../../components/BookList"; 
 import { AuthContext } from "../../context/AuthContext"; 
+import { useNavigate } from "react-router-dom";
 
 const MyBookDetail = () => {
   const { id } = useParams();
   const { user, fetchUser } = useContext(AuthContext); 
+  const navigate = useNavigate()
   
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [reportReason, setReportReason] = useState("");
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -41,21 +42,6 @@ const MyBookDetail = () => {
       await fetchUser(); 
     } catch (error) {
       alert(error.response?.data?.detail || "Download failed");
-    }
-  };
-
-  const handleReport = async (e) => {
-    e.preventDefault();
-    try {
-      await api.post("/report", {
-        book_id: parseInt(id),
-        reason: reportReason
-      });
-      alert("Report submitted successfully.");
-      setIsReporting(false);
-      setReportReason("");
-    } catch (error) {
-      alert(error.response?.data?.detail || "Report failed");
     }
   };
 
