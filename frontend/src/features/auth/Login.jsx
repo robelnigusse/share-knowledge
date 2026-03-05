@@ -98,7 +98,7 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-8 text-sm text-gray-500 dark:text-gray-400">
-          New here? <button onClick={() => navigate("/")} className="text-blue-600 hover:underline font-medium">Browse Books</button>
+          New here? <button onClick={() => navigate("/books")} className="text-blue-600 hover:underline font-medium">Browse Books</button>
         </p>
       </div>
     </div>
