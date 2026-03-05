@@ -120,6 +120,7 @@ def delete_book(book_id: int, db: Session = Depends(get_db),current_user_data: d
     
     delete_book_from_storage(book.file_url)
     db.delete(book)
+    db.query(users).filter(users.email == current_user_data.get("email")).first().credits -= 10
     db.commit()
     return {"message": "Book deleted successfully"}
     
