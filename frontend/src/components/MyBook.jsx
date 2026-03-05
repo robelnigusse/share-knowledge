@@ -4,6 +4,7 @@ function MyBook({ book }) {
   
   const cleanTitle = decodeURIComponent(book.title || "Untitled Book")
     .replace(/\.pdf$/i, "");
+    console.log(book)
 
   return (
     <div className="group bg-white dark:bg-gray-900 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-800 flex flex-col h-full overflow-hidden">
@@ -24,10 +25,10 @@ function MyBook({ book }) {
         </p>
 
         <Link
-          to={`/my-book/${book.id}`}
+          to={`/my-books/${book.id}`}
           className="mt-4 w-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 py-3 rounded-xl font-semibold hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 transition-all flex items-center justify-center gap-2"
         >
-          Delete
+          View Detail
           <span className="text-lg">→</span>
         </Link>
       </div>

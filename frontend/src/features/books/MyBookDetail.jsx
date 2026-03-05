@@ -3,14 +3,15 @@ import { useParams } from "react-router-dom";
 import api from "../../services/apiClient";
 import { BookList } from "../../components/BookList"; 
 import { AuthContext } from "../../context/AuthContext"; 
+import { useNavigate } from "react-router-dom";
 
 const MyBookDetail = () => {
   const { id } = useParams();
   const { user, fetchUser } = useContext(AuthContext); 
+  const navigate = useNavigate()
   
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [reportReason, setReportReason] = useState("");
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -20,6 +21,7 @@ const MyBookDetail = () => {
         setBook(response.data);
       } catch (error) {
         console.error("Error fetching book:", error);
+        
       } finally {
         setLoading(false);
       }
@@ -44,21 +46,6 @@ const MyBookDetail = () => {
     }
   };
 
-  const handleReport = async (e) => {
-    e.preventDefault();
-    try {
-      await api.post("/report", {
-        book_id: parseInt(id),
-        reason: reportReason
-      });
-      alert("Report submitted successfully.");
-      setIsReporting(false);
-      setReportReason("");
-    } catch (error) {
-      alert(error.response?.data?.detail || "Report failed");
-    }
-  };
-
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this book?")) return;
     try {
@@ -67,6 +54,7 @@ const MyBookDetail = () => {
         navigate('/my-books')
       } catch (error) {
         console.error("Error deleting book:", error);
+        alert("This book isn't uploaded by you:", error);
       } 
     }
 
