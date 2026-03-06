@@ -157,7 +157,7 @@ http://localhost:8000
 ```bash
 cd frontend
 npm install
-npm start
+npm run dev
 ```
 
 Runs at:
@@ -170,7 +170,7 @@ http://localhost:3000
 
 # 🔑 Environment Variables
 
-Create `.env` file:
+Create `backend/.env` file:
 
 ```
 DATABASE_URL=postgresql://...
@@ -178,6 +178,12 @@ GOOGLE_CLIENT_ID=your_google_client_id
 JWT_SECRET=your_secret_key
 SUPABASE_URL=your_supabase_url
 SUPABASE_SERVICE_KEY=your_key
+```
+Create `frontend/.env` file:
+
+```
+VITE_APP_GOOGLE_CLIENT_ID=your_google_client_id
+VITE_BACKEND_URL=http://localhost:8000
 ```
 
 ---
@@ -199,3 +205,4 @@ This platform is intended for educational and portfolio purposes. Users are resp
 # ⭐ Contributions
 
 Pull requests and suggestions are welcome.
+
