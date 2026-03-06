@@ -23,7 +23,6 @@ GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
 @router.post("/login")
 def login(response: Response,token_data: TokenData, db: Session = Depends(get_db)):
-    print(token_data)
     google_response = requests.get(
         f"https://oauth2.googleapis.com/tokeninfo?id_token={token_data.clientID}"
     )

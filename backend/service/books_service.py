@@ -111,7 +111,6 @@ def get_book_description(file: UploadFile):
     if response.status_code == 200:
         data = response.json()
         if data.get('success'):
-            print(data['summary'])
             return data['summary']
         else:
             raise HTTPException(status_code=400, detail=data['error'])

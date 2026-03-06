@@ -45,7 +45,6 @@ const BookDetails = () => {
 
     try {
       const response = await api.get(`/books/download/${id}`);
-      console.log(response?.data);
       window.open(response.data.file_url, "_blank");
       await fetchUser(); 
     } catch (error) {

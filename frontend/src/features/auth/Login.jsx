@@ -65,7 +65,7 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
-    if (user) console.log("User state updated:", user);
+    if (user) ;
   }, [user]);
 
   const handleError = () => console.log("Login Failed");

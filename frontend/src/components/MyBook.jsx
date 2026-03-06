@@ -4,7 +4,7 @@ function MyBook({ book }) {
   
   const cleanTitle = decodeURIComponent(book.title || "Untitled Book")
     .replace(/\.pdf$/i, "");
-    console.log(book)
+    
 
   return (
     <div className="group bg-white dark:bg-gray-900 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-800 flex flex-col h-full overflow-hidden">
