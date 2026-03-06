@@ -1,11 +1,13 @@
 import React, { useState, useContext } from 'react';
 import api from "../../services/apiClient";
+import { useMessage } from '../../context/MessageContext';
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 const Upload = () => {
   const { user, fetchUser } = useContext(AuthContext); 
   const navigate = useNavigate();
+  const {showMessage} = useMessage();
   
   const [file, setFile] = useState(null);
   const [category, setCategory] = useState("General");
@@ -29,18 +31,20 @@ const Upload = () => {
       
       await fetchUser(); 
 
-      alert(`Success! Credits earned. Title extracted: ${response.data.message}`);
+      // alert(`Success! Credits earned. Title extracted: ${response.data.message}`);
+      showMessage(`Success! Credits earned. Title extracted: ${response.data.message}`)
       navigate("/");
       
     } catch (error) {
       console.error("Upload failed", error);
       
       if (error.response?.status === 409) {
-        alert("This book already exists in our library!");
+        showMessage("This book already exists in our library!", 'error');
       } else if (error.response?.status === 400) {
-        alert(error.response.data.detail || "Invalid file or size.");
+        showMessage(error.response.data.detail || "Invalid file or size.", 'error');
       } else {
-        alert("Server error. Please try again later.");
+        // alert("Server error. Please try again later.");
+        showMessage("Server error. Please try again later.", "error")
       }
       setStatus("error");
     }

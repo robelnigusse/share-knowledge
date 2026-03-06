@@ -3,15 +3,18 @@ import { useParams } from "react-router-dom";
 import api from "../../services/apiClient";
 import { BookList } from "../../components/BookList"; 
 import { AuthContext } from "../../context/AuthContext"; 
+import {useMessage} from "../../context/MessageContext"
 
 const BookDetails = () => {
   const { id } = useParams();
   const { user, fetchUser } = useContext(AuthContext); 
+  const {showMessage} = useMessage()
   
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isReporting, setIsReporting] = useState(false);
   const [reportReason, setReportReason] = useState("");
+
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -31,7 +34,7 @@ const BookDetails = () => {
 
   const handleDownload = async () => {
     if (user.credits < 10) {
-      alert("You need at least 10 credits to download this book.");
+      showMessage("You need at least 10 credits to download this book.", 'error');
       return;
     }
 
@@ -41,7 +44,7 @@ const BookDetails = () => {
       window.open(response.data.file_url, "_blank");
       await fetchUser(); 
     } catch (error) {
-      alert(error.response?.data?.detail || "Download failed");
+      showMessage(error.response?.data?.detail || "Download failed", 'error');
     }
   };
 
@@ -52,11 +55,11 @@ const BookDetails = () => {
         book_id: parseInt(id),
         reason: reportReason
       });
-      alert("Report submitted successfully.");
+      showMessage("Report submitted successfully.");
       setIsReporting(false);
       setReportReason("");
     } catch (error) {
-      alert(error.response?.data?.detail || "Report failed");
+      showMessage(error.response?.data?.detail || "Report failed",'error');
     }
   };
 
