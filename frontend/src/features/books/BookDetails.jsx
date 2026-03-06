@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import api from "../../services/apiClient";
 import { BookList } from "../../components/BookList"; 
 import { AuthContext } from "../../context/AuthContext"; 
@@ -8,6 +8,7 @@ import {useMessage} from "../../context/MessageContext"
 const BookDetails = () => {
   const { id } = useParams();
   const { user, fetchUser } = useContext(AuthContext); 
+  const navigate = useNavigate()
   const {showMessage} = useMessage()
   
   const [book, setBook] = useState(null);
@@ -33,6 +34,10 @@ const BookDetails = () => {
   }, [id]);
 
   const handleDownload = async () => {
+    if(!user){
+      navigate('/login')
+      showMessage('You Must login Before Downloading', 'error')
+    }
     if (user.credits < 10) {
       showMessage("You need at least 10 credits to download this book.", 'error');
       return;

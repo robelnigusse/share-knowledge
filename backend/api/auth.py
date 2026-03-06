@@ -87,5 +87,5 @@ def logout(response: Response,current_user_data: dict = Depends(get_current_user
     if not current_user_data:
         raise HTTPException(status_code=401, detail="Unauthorized")
     
-    response.delete_cookie(key="access_token", httponly=True, samesite="lax")
+    response.delete_cookie(key="access_token", httponly=True, samesite="none")
     return {"message": "Logout successful"}

@@ -5,16 +5,17 @@ import {
   Navigate,
 } from "react-router-dom";
 import { useContext } from "react";
-import { AuthContext } from "../context/AuthContext"; // Ensure this is imported
+import { AuthContext } from "../context/AuthContext"; 
 
 import Home from "../features/home/Home";
 import Login from "../features/auth/Login";
 import Navbar from "../components/NavBar";
 import Upload from "../features/books/Upload";
-import BookDetails from "../features/books/BookDetails"; // You'll create this next
+import BookDetails from "../features/books/BookDetails";
 import { BookList } from "../components/BookList";
 import { MyBooks } from "../features/books/MyBooks";
 import MyBookDetail from "../features/books/MyBookDetail";
+import Profile from "../features/user/Profile";
 
 function Layout() {
   return (
@@ -64,6 +65,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <MyBookDetail />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "profile",
+        element: (
+          <ProtectedRoute>
+            <Profile />
           </ProtectedRoute>
         ),
       },
