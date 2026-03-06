@@ -68,7 +68,6 @@ export default function LoginPage() {
     if (user) ;
   }, [user]);
 
-  const handleError = () => console.log("Login Failed");
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
