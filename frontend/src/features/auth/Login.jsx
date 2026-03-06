@@ -102,7 +102,7 @@ export default function LoginPage() {
         <div className="flex justify-center py-4 px-2 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
           <GoogleLogin
             onSuccess={handleSuccess}
-            onError={() => console.log("Login Failed")}
+            onError={() => showMessage("Login Failed", 'error')}
             theme="filled_blue"
             shape="pill"
           />
