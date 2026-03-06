@@ -141,7 +141,7 @@ pip install -r requirements.txt
 Run server:
 
 ```bash
-uvicorn app.main:app --reload
+uvicorn main:app --reload
 ```
 
 Server runs at:
@@ -205,4 +205,5 @@ This platform is intended for educational and portfolio purposes. Users are resp
 # ⭐ Contributions
 
 Pull requests and suggestions are welcome.
+
 
