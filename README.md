@@ -1,6 +1,6 @@
-# 📚 BookShare – PDF Book Sharing Platform
+# 📚 SharePDF – PDF Book Sharing Platform
 
-BookShare is a full-stack web application that allows users to upload, share, and download books in PDF format. The platform focuses on community sharing while including moderation tools, duplicate detection, and a credit-based system for downloads.
+SharePDF is a full-stack web application that allows users to upload, share, and download books in PDF format. The platform focuses on community sharing while including moderation tools, duplicate detection, and a credit-based system for downloads.
 
 This project is built as a portfolio project to demonstrate modern full-stack development using **React, FastAPI, PostgreSQL, and Supabase storage**.
 
@@ -94,7 +94,7 @@ Supabase Storage (PDFs)
 # 📂 Project Structure
 
 ```
-bookshare/
+share-knowledge/
 │
 ├── frontend/              # React application
 │
@@ -117,8 +117,8 @@ bookshare/
 ## 1️⃣ Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/bookshare.git
-cd bookshare
+git clone https://github.com/robelnigusse/share-knowledge.git
+cd share-knowledge
 ```
 
 ---
@@ -128,6 +128,7 @@ cd bookshare
 Create virtual environment:
 
 ```bash
+cd backend
 python -m venv venv
 source venv/bin/activate
 ```
@@ -205,5 +206,6 @@ This platform is intended for educational and portfolio purposes. Users are resp
 # ⭐ Contributions
 
 Pull requests and suggestions are welcome.
+
 
 
