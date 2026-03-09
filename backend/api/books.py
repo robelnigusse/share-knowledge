@@ -4,7 +4,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
-from schemas.book import BookResponse
+from schemas.book import BookResponse,BookResponseWithPagination
 from service.auth_service import get_current_user
 from service.books_service import  check_file_exists, delete_book_from_storage, get_book_description, get_hash, upload_book_to_db, upload_book_to_storage
 from api.auth import get_db
@@ -87,14 +87,32 @@ def users_books(current_user_data: dict = Depends(get_current_user),db: Session 
     return result
 
 
-@router.get("",response_model=list[BookResponse])
-def get_books(search:Optional[str] = None , db:Session=Depends(get_db)):
+@router.get("",response_model=BookResponseWithPagination)
+def get_books(page : int = 1,page_size: int = 5,search:Optional[str] = None , db:Session=Depends(get_db)):
+    if page < 1:
+        raise HTTPException(status_code=400, detail="Invalid page number")
+    query = db.query(books)    
+
     if search:
         search_filter = f"%{search}%"
-        return db.query(books).filter(
+        query = query.filter(
             or_(books.title.ilike(search_filter),
-                books.category.ilike(search_filter) )).all()
-    return db.query(books).all()
+                books.category.ilike(search_filter) ))
+    total_count = query.count()
+    total_pages = (total_count + page_size - 1) // page_size
+
+    if page > total_pages:
+        raise HTTPException(status_code=404, detail="Page not found")
+    result = {
+        "data": query.order_by(books.id).offset((page - 1) * page_size).limit(page_size).all(),
+        "total": total_count,
+        "page": page,
+        "page_size": page_size,
+        "next_page": page + 1 if page < total_pages else None,
+        "prev_page": page - 1 if page > 1 else None
+    }
+
+    return result
 
 
 @router.get("/{book_id}",response_model=BookResponse)
