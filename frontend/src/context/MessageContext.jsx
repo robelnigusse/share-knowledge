@@ -33,7 +33,7 @@ export const MessageProvider = ({ children }) => {
       {children}
       
       {/* Toast Container */}
-      <div className="fixed bottom-6 right-6 z-[100] space-y-3 max-w-sm w-full pointer-events-none">
+      <div className="fixed bottom-6 right-4 z-[100] space-y-3 max-w-sm w-full pointer-events-none">
         {messages.map((msg) => (
           <div
             key={msg.id}

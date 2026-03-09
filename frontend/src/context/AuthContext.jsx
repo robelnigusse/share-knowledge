@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect } from "react";
 import api from "../services/apiClient"; // Ensure this path is correct
 
 export const AuthContext = createContext();
@@ -10,7 +10,10 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark" || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    if (
+      savedTheme === "dark" ||
+      (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)
+    ) {
       document.documentElement.classList.add("dark");
       setIsDark(true);
     }
@@ -32,7 +35,7 @@ export function AuthProvider({ children }) {
     try {
       const res = await api.get("/me");
       setUser(res.data);
-      return res.data
+      return res.data;
     } catch (err) {
       setUser(null);
     } finally {
@@ -45,7 +48,9 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, setUser, fetchUser, loading, isDark, toggleDarkMode }}>
+    <AuthContext.Provider
+      value={{ user, setUser, fetchUser, loading, isDark, toggleDarkMode }}
+    >
       {children}
     </AuthContext.Provider>
   );

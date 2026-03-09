@@ -1,21 +1,21 @@
 import { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../services/apiClient";
-import { BookList } from "../../components/BookList"; 
-import { AuthContext } from "../../context/AuthContext"; 
-import {useMessage} from "../../context/MessageContext"
+import { BookList } from "../../components/BookList";
+import { AuthContext } from "../../context/AuthContext";
+import { useMessage } from "../../context/MessageContext";
 
 const BookDetails = () => {
   const { id } = useParams();
-  const { user, fetchUser } = useContext(AuthContext); 
-  const navigate = useNavigate()
-  const {showMessage} = useMessage()
-  
+  const { user, fetchUser } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const { showMessage } = useMessage();
+
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isReporting, setIsReporting] = useState(false);
   const [reportReason, setReportReason] = useState("");
-
+  const [disabled, setDisabled] = useState(false);
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -34,41 +34,52 @@ const BookDetails = () => {
   }, [id]);
 
   const handleDownload = async () => {
-    if(!user){
-      navigate('/login')
-      showMessage('You Must login Before Downloading', 'error')
+    if (!user) {
+      navigate("/login");
+      showMessage("You Must login Before Downloading", "error");
     }
     if (user.credits < 10) {
-      showMessage("You need at least 10 credits to download this book.", 'error');
+      showMessage(
+        "You need at least 10 credits to download this book.",
+        "error",
+      );
       return;
     }
 
     try {
       const response = await api.get(`/books/download/${id}`);
       window.open(response.data.file_url, "_blank");
-      await fetchUser(); 
+      await fetchUser();
     } catch (error) {
-      showMessage(error.response?.data?.detail || "Download failed", 'error');
+      showMessage(error.response?.data?.detail || "Download failed", "error");
     }
   };
 
   const handleReport = async (e) => {
     e.preventDefault();
+    setDisabled(true);
+
     try {
       await api.post("/report", {
         book_id: parseInt(id),
-        reason: reportReason
+        reason: reportReason,
       });
       showMessage("Report submitted successfully.");
       setIsReporting(false);
       setReportReason("");
     } catch (error) {
-      showMessage(error.response?.data?.detail || "Report failed",'error');
+      showMessage(error.response?.data?.detail || "Report failed", "error");
+    } finally {
+      setDisabled(false);
     }
   };
 
-  if (loading) return <div className="py-20 text-center dark:text-white">Loading...</div>;
-  if (!book) return <div className="py-20 text-center dark:text-white">Book not found.</div>;
+  if (loading)
+    return <div className="py-20 text-center dark:text-white">Loading...</div>;
+  if (!book)
+    return (
+      <div className="py-20 text-center dark:text-white">Book not found.</div>
+    );
 
   const cleanTitle = decodeURIComponent(book.title).replace(".pdf", "");
 
@@ -80,17 +91,24 @@ const BookDetails = () => {
             <span className="px-3 py-1 text-xs font-bold uppercase tracking-widest text-blue-600 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
               {book.category}
             </span>
-            
+
             {user?.id !== book.owner_id && (
-              <button 
-                onClick={() => setIsReporting(true)}
+              <button
+                onClick={() => {
+                  if (!user) {
+                    showMessage("To Report login first!", "error");
+                    navigate("/login");
+                  }else{
+                    setIsReporting(true);
+                  }
+                }}
                 className="text-xs font-medium text-red-500 hover:underline"
               >
                 Report Content
               </button>
             )}
           </div>
-          
+
           <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-6">
             {cleanTitle}
           </h1>
@@ -99,13 +117,23 @@ const BookDetails = () => {
             {book.description}
           </p>
 
-          <button 
+          <button
             onClick={handleDownload}
             className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl transition-all shadow-lg shadow-blue-500/25 active:scale-95"
           >
             <span>Download (10 Credits)</span>
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M7 10l5 5m0 0l5-5m-5 5V3" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M7 10l5 5m0 0l5-5m-5 5V3"
+              />
             </svg>
           </button>
         </div>
@@ -114,9 +142,11 @@ const BookDetails = () => {
       {isReporting && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
           <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 max-w-md w-full shadow-2xl border dark:border-gray-800">
-            <h2 className="text-xl font-bold mb-4 dark:text-white">Report Book</h2>
+            <h2 className="text-xl font-bold mb-4 dark:text-white">
+              Report Book
+            </h2>
             <form onSubmit={handleReport} className="space-y-4">
-              <textarea 
+              <textarea
                 required
                 placeholder="Reason for reporting (e.g., inappropriate content, wrong category)..."
                 className="w-full p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-red-500 dark:text-white"
@@ -124,18 +154,18 @@ const BookDetails = () => {
                 onChange={(e) => setReportReason(e.target.value)}
               />
               <div className="flex gap-3">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setIsReporting(false)}
-                  className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 font-bold dark:text-white"
+                  className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 font-bold dark:text-white "
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   type="submit"
-                  className="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600"
+                  className={`flex-1 py-3 rounded-xl text-white font-bold  ${disabled ? "disabled:cursor-not-allowed disabled:bg-red-300" : "bg-red-500  hover:bg-red-600"}`}
                 >
-                  Submit
+                  {disabled ? "Submitting" : "Submit"}
                 </button>
               </div>
             </form>
