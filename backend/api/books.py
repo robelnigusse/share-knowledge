@@ -76,6 +76,10 @@ def downlaod_book(book_id: int, db: Session = Depends(get_db), current_user_data
     if db.query(users).filter(users.email == current_user_data.get("email")).first().credits < 10:
         raise HTTPException(status_code=403, detail="You don't have enough credits to download this book")
     
+    if book.owner_id == db.query(users).filter(users.email == current_user_data.get("email")).first().id:
+        book.commit()
+        return {"file_url": book.file_url}
+    
     db.query(users).filter(users.email == current_user_data.get("email")).first().credits -= 10
     db.commit()
     
