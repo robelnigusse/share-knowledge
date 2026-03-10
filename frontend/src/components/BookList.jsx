@@ -12,7 +12,7 @@ export const BookList = ({ search = true, category }) => {
   const [paginationInfo, setPaginationInfo] = useState({
     next_page: null,
     prev_page: null,
-    total: 0
+    total: 0,
   });
 
   const { user } = useContext(AuthContext);
@@ -33,18 +33,18 @@ export const BookList = ({ search = true, category }) => {
       try {
         const params = {
           page: currentPage,
-          page_size: 6, 
-          search: search ? debouncedSearch : category
+          page_size: 6,
+          search: search ? debouncedSearch : category,
         };
 
         const response = await api.get("/books/", { params });
         console.log("Fetched books:", response.data);
-        
+
         setBooks(response.data.data);
         setPaginationInfo({
           next_page: response.data.next_page,
           prev_page: response.data.prev_page,
-          total: response.data.total
+          total: response.data.total,
         });
       } catch (error) {
         console.error("Error fetching books:", error);
@@ -78,15 +78,18 @@ export const BookList = ({ search = true, category }) => {
       <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {loading ? (
           [...Array(3)].map((_, i) => (
-            <div key={i} className="h-64 bg-gray-200 dark:bg-gray-800 animate-pulse rounded-2xl" />
+            <div
+              key={i}
+              className="h-64 bg-gray-200 dark:bg-gray-800 animate-pulse rounded-2xl"
+            />
           ))
         ) : books.length > 0 ? (
           books.map((book) => <BookCard key={book.id} book={book} />)
         ) : (
           <div className="col-span-full text-center py-20 bg-white dark:bg-gray-900 rounded-3xl border border-dashed border-gray-300 dark:border-gray-800">
             <p className="text-xl font-medium text-gray-500">
-              {search 
-                ? `No books found matching "${debouncedSearch}"` 
+              {search
+                ? `No books found matching "${debouncedSearch}"`
                 : `No books available in ${category}`}
             </p>
           </div>
@@ -94,26 +97,44 @@ export const BookList = ({ search = true, category }) => {
       </section>
 
       {!loading && books.length > 0 && (
-        <div className="flex items-center justify-center space-x-4 pt-4">
-          <button
-            onClick={() => setCurrentPage((prev) => prev - 1)}
-            disabled={!paginationInfo.prev_page}
-            className="px-6 py-2 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-sm font-medium"
-          >
-            Previous
-          </button>
-          
-          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-            Page {currentPage}
-          </span>
+        <div className="flex flex-col items-center space-y-4 pt-10">
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+            Total {paginationInfo.total} Books found
+          </p>
 
-          <button
-            onClick={() => setCurrentPage((prev) => prev + 1)}
-            disabled={!paginationInfo.next_page}
-            className="px-6 py-2 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-sm font-medium"
-          >
-            Next
-          </button>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setCurrentPage((prev) => prev - 1)}
+              disabled={!paginationInfo.prev_page}
+              className="p-2.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 disabled:opacity-30 disabled:cursor-not-allowed hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300 shadow-sm group"
+              aria-label="Previous Page"
+            >
+              <span className="text-gray-600 dark:text-gray-300 group-hover:text-blue-500">
+                ←
+              </span>
+            </button>
+
+            <div className="flex items-center bg-gray-100 dark:bg-gray-800/50 p-1 rounded-2xl border border-gray-200 dark:border-gray-800">
+              <span className="px-4 py-2 rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-500/30 text-sm font-bold">
+                {currentPage}
+              </span>
+
+              <span className="px-4 text-sm font-medium text-gray-500 dark:text-gray-400">
+                of {Math.ceil(paginationInfo.total / 6)}
+              </span>
+            </div>
+
+            <button
+              onClick={() => setCurrentPage((prev) => prev + 1)}
+              disabled={!paginationInfo.next_page}
+              className="p-2.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 disabled:opacity-30 disabled:cursor-not-allowed hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300 shadow-sm group"
+              aria-label="Next Page"
+            >
+              <span className="text-gray-600 dark:text-gray-300 group-hover:text-blue-500">
+                →
+              </span>
+            </button>
+          </div>
         </div>
       )}
     </div>
