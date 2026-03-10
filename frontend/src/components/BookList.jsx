@@ -8,7 +8,18 @@ export const BookList = ({ search = true, category }) => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [paginationInfo, setPaginationInfo] = useState({
+    next_page: null,
+    prev_page: null,
+    total: 0
+  });
+
   const { user } = useContext(AuthContext);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, category]);
 
   useEffect(() => {
     if (!search) return;
@@ -20,12 +31,21 @@ export const BookList = ({ search = true, category }) => {
     const fetchBooks = async () => {
       setLoading(true);
       try {
-        const params = search 
-          ? { search: debouncedSearch } 
-          : { search: category };
+        const params = {
+          page: currentPage,
+          page_size: 6, 
+          search: search ? debouncedSearch : category
+        };
 
         const response = await api.get("/books/", { params });
-        setBooks(response.data);
+        console.log("Fetched books:", response.data);
+        
+        setBooks(response.data.data);
+        setPaginationInfo({
+          next_page: response.data.next_page,
+          prev_page: response.data.prev_page,
+          total: response.data.total
+        });
       } catch (error) {
         console.error("Error fetching books:", error);
       } finally {
@@ -34,7 +54,7 @@ export const BookList = ({ search = true, category }) => {
     };
 
     fetchBooks();
-  }, [debouncedSearch, category, search]);
+  }, [debouncedSearch, category, search, currentPage]);
 
   return (
     <div className="space-y-8">
@@ -58,10 +78,7 @@ export const BookList = ({ search = true, category }) => {
       <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {loading ? (
           [...Array(3)].map((_, i) => (
-            <div
-              key={i}
-              className="h-64 bg-gray-200 dark:bg-gray-800 animate-pulse rounded-2xl"
-            />
+            <div key={i} className="h-64 bg-gray-200 dark:bg-gray-800 animate-pulse rounded-2xl" />
           ))
         ) : books.length > 0 ? (
           books.map((book) => <BookCard key={book.id} book={book} />)
@@ -75,6 +92,30 @@ export const BookList = ({ search = true, category }) => {
           </div>
         )}
       </section>
+
+      {!loading && books.length > 0 && (
+        <div className="flex items-center justify-center space-x-4 pt-4">
+          <button
+            onClick={() => setCurrentPage((prev) => prev - 1)}
+            disabled={!paginationInfo.prev_page}
+            className="px-6 py-2 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-sm font-medium"
+          >
+            Previous
+          </button>
+          
+          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            Page {currentPage}
+          </span>
+
+          <button
+            onClick={() => setCurrentPage((prev) => prev + 1)}
+            disabled={!paginationInfo.next_page}
+            className="px-6 py-2 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-sm font-medium"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };
