@@ -163,7 +163,8 @@ const BookDetails = () => {
                 </button>
                 <button
                   type="submit"
-                  className={`flex-1 py-3 rounded-xl text-white font-bold  ${disabled ? "disabled:cursor-not-allowed disabled:bg-red-300" : "bg-red-500  hover:bg-red-600"}`}
+                  disabled={disabled}
+                  className="flex-1 py-3 rounded-xl text-white font-bold disabled:cursor-not-allowed disabled:hover:bg-red-300 disabled:bg-red-300 bg-red-500  hover:bg-red-600"
                 >
                   {disabled ? "Submitting" : "Submit"}
                 </button>
