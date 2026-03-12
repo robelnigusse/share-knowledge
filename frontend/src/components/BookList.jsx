@@ -77,12 +77,42 @@ export const BookList = ({ search = true, category }) => {
 
       <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {loading ? (
-          [...Array(3)].map((_, i) => (
-            <div
-              key={i}
-              className="h-64 bg-gray-200 dark:bg-gray-800 animate-pulse rounded-2xl"
-            />
-          ))
+          <div className="col-span-full flex flex-col items-center justify-center py-12 space-y-6">
+            <div className="max-w-md w-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 p-6 rounded-3xl text-center animate-in fade-in zoom-in duration-500">
+              <div className="flex justify-center mb-3">
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                </span>
+              </div>
+              <h3 className="text-blue-900 dark:text-blue-100 font-semibold mb-1">
+                Waking up the server...
+              </h3>
+              <p className="text-sm text-blue-700 dark:text-blue-300 leading-relaxed">
+                Our backend takes a quick nap after 15 minutes of inactivity. It
+                usually takes{" "}
+                <span className="font-bold underline">30-60 seconds</span> to
+                warm up. Thanks for your patience!
+              </p>
+
+              <div className="mt-4 w-full bg-blue-200 dark:bg-blue-800 rounded-full h-1.5 overflow-hidden">
+                <div
+                  className="bg-blue-500 h-full animate-[loading_60s_ease-in-out_infinite]"
+                  style={{ width: "100%" }}
+                ></div>
+              </div>
+            </div>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 w-full">
+              {[...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className="h-64 bg-gray-100 dark:bg-gray-800/50 animate-pulse rounded-2xl border border-gray-200 dark:border-gray-800"
+                />
+              ))}
+            </div>
+
+            
+          </div>
         ) : books.length > 0 ? (
           books.map((book) => <BookCard key={book.id} book={book} />)
         ) : (
