@@ -33,8 +33,7 @@ def get_current_user(request: Request):
     )
     token = request.cookies.get("access_token")
     if token is None:
-        raise HTTPException(status_code=401, detail="Token not found")
-
+        raise HTTPException(status_code=200, detail="Token not found")
     try:
         
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])

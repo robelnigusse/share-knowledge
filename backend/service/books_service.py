@@ -90,7 +90,8 @@ def get_book_description(file: UploadFile):
         text += page.extract_text() or ""
     if not text.split():
         raise HTTPException(status_code=400, detail="File is empty")
-    
+    if len(text) > 2000:
+        text = text[:2000]
     url = AI_URL
     
     payload = {

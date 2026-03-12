@@ -34,6 +34,10 @@ export function AuthProvider({ children }) {
   const fetchUser = async () => {
     try {
       const res = await api.get("/me");
+      if (res.data.detail === "Token not found") {
+        setUser(null);
+        return;
+      }
       setUser(res.data);
       return res.data;
     } catch (err) {
