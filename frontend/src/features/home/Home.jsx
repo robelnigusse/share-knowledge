@@ -13,7 +13,7 @@ function Home() {
             Upload your books, earn credits, and explore what others are sharing.
           </p>
         </header>
-        <BookList />        
+        <BookList home={true} />        
       </main>
     </div>
   );
